@@ -3,7 +3,7 @@ import os
 import random
 from pydub import AudioSegment
 import json
-from vad import vad_for_folder
+from datasets.vad import vad_for_folder
 from pathlib import Path
 import logging
 
@@ -35,7 +35,7 @@ repos = [
     "Actor_24",
 ]
 combinations = ["neu_emo", "emo_neu", "neu_emo_neu", "emo_emo"]
-probabilities = np.array([0.3, 0.3, 0.3, 0.1])
+probabilities = np.array([0.25, 0.25, 0.25, 0.25])
 
 
 def prepare_ravdess(
@@ -67,8 +67,9 @@ def prepare_ravdess(
         destin_folder = data_folder + "processed/" + repo + "/"
         if not os.path.exists(destin_folder):
             os.makedirs(destin_folder)
-        vad_for_folder(source_folder, destin_folder)
-        resampling_for_folder(destin_folder, destin_folder)
+        resampling_for_folder(source_folder, destin_folder)
+        vad_for_folder(destin_folder, destin_folder)
+
     logger.info("vad and resampling finished")
     logger.info("Start RAVDESS concatenation ...")
     data_json = concat_wavs(data_folder, save_json)
@@ -232,39 +233,26 @@ def concat_wavs(data_folder, save_json):
 
             else:
                 emo_sample_1 = emotion_wavs[0]
-                try:
-                    emo_sample_2 = emotion_wavs[1]
-                except:
-                    continue
 
                 emotion_input_1 = AudioSegment.from_wav(emo_sample_1)
-                emotion_input_2 = AudioSegment.from_wav(emo_sample_2)
-                
-                emotion_input_2 += emotion_input_1.dBFS - emotion_input_2.dBFS
-                combined_input = emotion_input_1 + emotion_input_2
-                
-                out_name = combine_path + emo_sample_1.split("/")[-1][:-4] + "_" + emo_sample_2.split("/")[-1]
-                combined_input.export(out_name, format="wav")
+
+                out_name = combine_path + emo_sample_1.split("/")[-1]
+                emotion_input_1.export(out_name, format="wav")
                 
                 id = out_name.split("/")[-1][:-4]
                 data_json[id] = {
                     "wav": out_name,
-                    "duration": len(combined_input)/1000,
+                    "duration": len(emotion_input_1)/1000,
                     "emotion": [
                         {
                             "emo": get_emotion(emo_sample_1),
                             "start": 0,
                             "end": len(emotion_input_1)/1000
-                        },
-                        {
-                            "emo": get_emotion(emo_sample_2),
-                            "start": len(emotion_input_1)/1000,
-                            "end": len(combined_input)/1000
                         }
                     ]
                 }
                 
-                emotion_wavs = emotion_wavs[2:]
+                emotion_wavs = emotion_wavs[1:]
 
     with open(save_json, "w") as outfile:
         json.dump(data_json, outfile)

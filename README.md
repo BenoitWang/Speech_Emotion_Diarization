@@ -3,6 +3,8 @@ This project aims to accomplish a emotion diarization task, the solution is test
 
 ## Dependencies
 The implementation is based on SpeechBrain
+To run the recipe, do `python train_with_wav2vec.py hparams/train_with_wav2vec.yaml`
+The preparation may take several hours.
 
 ## Datasets
 ### Test Set

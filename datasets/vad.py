@@ -137,13 +137,16 @@ def vad_for_folder(input_path, out_path):
         for i, segment in enumerate(segments):
             total_segment += segment
 
-        write_wave(out_path + file, total_segment, sample_rate)
+        # abandon short emotions (< 0.2s)
+        if len(total_segment) > 6400: # 0.2 * 16000 * 2
+            write_wave(out_path + file, total_segment, sample_rate)
 
 def write_audio(input_path, out_path):
     try:
         audio, sample_rate = read_wave(input_path)
     except Exception as e:
         print(e)
+    print(sample_rate)
     vad = webrtcvad.Vad(2)
     frames = frame_generator(30, audio, sample_rate)
     frames = list(frames)
@@ -153,5 +156,7 @@ def write_audio(input_path, out_path):
 
     for i, segment in enumerate(segments):
         total_segment += segment
-
-    write_wave(out_path, total_segment, sample_rate)
+    
+    # abandon short emotions (< 0.2s)
+    if len(total_segment) > 6400: # 0.2 * 16000 * 2
+        write_wave(out_path, total_segment, sample_rate)
