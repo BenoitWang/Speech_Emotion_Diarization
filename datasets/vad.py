@@ -146,7 +146,6 @@ def write_audio(input_path, out_path):
         audio, sample_rate = read_wave(input_path)
     except Exception as e:
         print(e)
-    print(sample_rate)
     vad = webrtcvad.Vad(2)
     frames = frame_generator(30, audio, sample_rate)
     frames = list(frames)

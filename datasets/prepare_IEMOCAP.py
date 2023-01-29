@@ -53,7 +53,8 @@ def prepare_iemocap(
                     os.makedirs(destin_folder)
                 if not os.path.exists(destin_folder + f"{id}.wav"):
                     write_audio(file, destin_folder + f"{id}.wav")
-                emotion_wavs.append(destin_folder + f"{id}.wav")
+                if os.path.exists(destin_folder + f"{id}.wav"):
+                    emotion_wavs.append(destin_folder + f"{id}.wav")
                     
             if line[3] == "exc":
                 dict[id] = "happy"
@@ -63,7 +64,8 @@ def prepare_iemocap(
                     os.makedirs(destin_folder)
                 if not os.path.exists(destin_folder + f"{id}.wav"):
                     write_audio(file, destin_folder + f"{id}.wav")
-                emotion_wavs.append(destin_folder + f"{id}.wav")
+                if os.path.exists(destin_folder + f"{id}.wav"):
+                    emotion_wavs.append(destin_folder + f"{id}.wav")
                 
             if line[3] == "sad":
                 dict[id] = "sad"
@@ -73,7 +75,8 @@ def prepare_iemocap(
                     os.makedirs(destin_folder)
                 if not os.path.exists(destin_folder + f"{id}.wav"):
                     write_audio(file, destin_folder + f"{id}.wav")
-                emotion_wavs.append(destin_folder + f"{id}.wav")
+                if os.path.exists(destin_folder + f"{id}.wav"):
+                    emotion_wavs.append(destin_folder + f"{id}.wav")
                 
             if line[3] == "ang":
                 dict[id] = "angry"
@@ -83,7 +86,8 @@ def prepare_iemocap(
                     os.makedirs(destin_folder)
                 if not os.path.exists(destin_folder + f"{id}.wav"):
                     write_audio(file, destin_folder + f"{id}.wav")
-                emotion_wavs.append(destin_folder + f"{id}.wav")
+                if os.path.exists(destin_folder + f"{id}.wav"):
+                    emotion_wavs.append(destin_folder + f"{id}.wav")
                 
             if line[3] == "neu":
                 dict[id] = "neutral"
@@ -93,7 +97,8 @@ def prepare_iemocap(
                     os.makedirs(destin_folder)
                 if not os.path.exists(destin_folder + f"{id}.wav"):
                     write_audio(file, destin_folder + f"{id}.wav")
-                neutral_wavs.append(destin_folder + f"{id}.wav")
+                if os.path.exists(destin_folder + f"{id}.wav"):
+                    neutral_wavs.append(destin_folder + f"{id}.wav")
     logger.info("VAD finished")
     logger.info("Start IEMOCAP concatenation ...")
     data_json = concat_wavs(data_folder, save_json, emotion_wavs, neutral_wavs, dict)
