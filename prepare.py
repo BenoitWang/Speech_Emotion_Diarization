@@ -36,55 +36,55 @@ def prepare_train(
     
     all_dict = {}
     if emovdb_folder is not None:
-        if not os.path.exists(emovdb_folder + "/EMOV-DB.json"):
-            emovdb = prepare_emovdb(emovdb_folder, emovdb_folder + "/EMOV-DB.json", seed)
+        if not os.path.exists(emovdb_folder + "EMOV-DB.json"):
+            emovdb = prepare_emovdb(emovdb_folder, emovdb_folder + "EMOV-DB.json", seed)
         else:
-            logger.info(f"{emovdb_folder}/EMOV-DB.json exists, skipping EMOV-DB preparation.")
-            with open(f'{emovdb_folder}/EMOV-DB.json', 'r') as f:
+            logger.info(f"{emovdb_folder}EMOV-DB.json exists, skipping EMOV-DB preparation.")
+            with open(f'{emovdb_folder}EMOV-DB.json', 'r') as f:
                 emovdb = json.load(f)
         all_dict.update(emovdb.items())
     else:
         logger.info("EMOV-DB is not used in this exp.")
         
     if esd_folder is not None:
-        if not os.path.exists(esd_folder + "/ESD.json"):
-            esd = prepare_esd(esd_folder, esd_folder + "/ESD.json", seed)
+        if not os.path.exists(esd_folder + "ESD.json"):
+            esd = prepare_esd(esd_folder, esd_folder + "ESD.json", seed)
         else:
-            logger.info(f"{esd_folder}/ESD.json exists, skipping ESD preparation.")
-            with open(f'{esd_folder}/ESD.json', 'r') as f:
+            logger.info(f"{esd_folder}ESD.json exists, skipping ESD preparation.")
+            with open(f'{esd_folder}ESD.json', 'r') as f:
                 esd = json.load(f)
         all_dict.update(esd.items())
     else:
         logger.info("ESD is not used in this exp.")
         
     if iemocap_folder is not None:
-        if not os.path.exists(iemocap_folder + "/IEMOCAP.json"):
-            iemocap = prepare_iemocap(iemocap_folder, iemocap_folder + "/IEMOCAP.json", seed)
+        if not os.path.exists(iemocap_folder + "IEMOCAP.json"):
+            iemocap = prepare_iemocap(iemocap_folder, iemocap_folder + "IEMOCAP.json", seed)
         else:
-            logger.info(f"{iemocap_folder}/IEMOCAP.json exists, skipping IEMOCAP preparation.")
-            with open(f'{iemocap_folder}/IEMOCAP.json', 'r') as f:
+            logger.info(f"{iemocap_folder}IEMOCAP.json exists, skipping IEMOCAP preparation.")
+            with open(f'{iemocap_folder}IEMOCAP.json', 'r') as f:
                 iemocap = json.load(f)
         all_dict.update(iemocap.items())
     else:
         logger.info("IEMOCAP is not used in this exp.")
         
     if jlcorpus_folder is not None:
-        if not os.path.exists(jlcorpus_folder + "/JL_CORPUS.json"):
-            jlcorpus = prepare_jlcorpus(jlcorpus_folder, jlcorpus_folder + "/JL_CORPUS.json", seed)
+        if not os.path.exists(jlcorpus_folder + "JL_CORPUS.json"):
+            jlcorpus = prepare_jlcorpus(jlcorpus_folder, jlcorpus_folder + "JL_CORPUS.json", seed)
         else:
-            logger.info(f"{jlcorpus_folder}/JL_CORPUS.json exists, skipping JL_CORPUS preparation.")
-            with open(f'{jlcorpus_folder}/JL_CORPUS.json', 'r') as f:
+            logger.info(f"{jlcorpus_folder}JL_CORPUS.json exists, skipping JL_CORPUS preparation.")
+            with open(f'{jlcorpus_folder}JL_CORPUS.json', 'r') as f:
                 jlcorpus = json.load(f)
         all_dict.update(jlcorpus.items())
     else:
         logger.info("JL_CORPUS is not used in this exp.")
         
     if ravdess_folder is not None:
-        if not os.path.exists(ravdess_folder + "/RAVDESS.json"):
-            ravdess = prepare_ravdess(ravdess_folder, ravdess_folder + "/RAVDESS.json", seed)
+        if not os.path.exists(ravdess_folder + "RAVDESS.json"):
+            ravdess = prepare_ravdess(ravdess_folder, ravdess_folder + "RAVDESS.json", seed)
         else:
-            logger.info(f"{ravdess_folder}/RAVDESS.json exists, skipping RAVDESS preparation.")
-            with open(f'{ravdess_folder}/RAVDESS.json', 'r') as f:
+            logger.info(f"{ravdess_folder}RAVDESS.json exists, skipping RAVDESS preparation.")
+            with open(f'{ravdess_folder}RAVDESS.json', 'r') as f:
                 ravdess = json.load(f)
         all_dict.update(ravdess.items())
     else:
