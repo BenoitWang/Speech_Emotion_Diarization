@@ -89,11 +89,19 @@ def prepare_train(
         all_dict.update(ravdess.items())
     else:
         logger.info("RAVDESS is not used in this exp.")
-
+    
+    bad_keys = []
     for key in all_dict.keys():
-        intervals, ctc_label, frame_label = get_labels(all_dict[key], win_len, stride)
-        all_dict[key]["frame_label"] = frame_label
-        all_dict[key]["ctc_label"] = ctc_label
+        try:
+            intervals, ctc_label, frame_label = get_labels(all_dict[key], win_len, stride)
+            all_dict[key]["frame_label"] = frame_label
+            all_dict[key]["ctc_label"] = ctc_label
+        except:
+            logger.info(f"Impossible to get labels for id {key}, window too large.")
+            bad_keys.append(key)
+            continue
+    for key in bad_keys:
+        del all_dict[key]
 
     data_split = split_sets(all_dict, split_ratio)
     
@@ -133,12 +141,19 @@ def prepare_test(
         logger.info(f"ZED.json can't be found under {ZED_folder}")
         return
 
+    bad_keys = []
     for key in all_dict.keys():
-        all_dict[key]["wav"] = all_dict[key]["wav"].replace("datafolder", ZED_folder)
-        intervals, ctc_label, frame_label = get_labels(all_dict[key], win_len, stride)
-        all_dict[key]["frame_label"] = frame_label
-        all_dict[key]["ctc_label"] = ctc_label
-        assert len(intervals) == len(ctc_label)
+        try:
+            all_dict[key]["wav"] = all_dict[key]["wav"].replace("datafolder", ZED_folder)
+            intervals, ctc_label, frame_label = get_labels(all_dict[key], win_len, stride)
+            all_dict[key]["frame_label"] = frame_label
+            all_dict[key]["ctc_label"] = ctc_label
+        except:
+            logger.info(f"Impossible to get labels for id {key}, window too large.")
+            bad_keys.append(key)
+            continue
+    for key in bad_keys:
+        del all_dict[key]
     
     create_json(all_dict, save_json_test)
 
