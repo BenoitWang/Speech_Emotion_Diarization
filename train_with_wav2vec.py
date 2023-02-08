@@ -8,7 +8,9 @@ import os
 import sys
 import speechbrain as sb
 from hyperpyyaml import load_hyperpyyaml
+from utils.EDER import EDER
 import torch
+import json
 
 
 class EmoIdBrain(sb.Brain):
@@ -19,19 +21,14 @@ class EmoIdBrain(sb.Brain):
         batch = batch.to(self.device)
         # batch = batch.to("cpu")
         self.modules = self.modules.to("cuda")
-        
-        wavs, lens = batch.sig
+        self.hparams.input_norm = self.hparams.input_norm.to("cuda")
 
+        wavs, lens = batch.sig
+        wavs = self.hparams.input_norm(wavs, lens)
         outputs = self.modules.wav2vec2(wavs)
-        print(batch.sig[0].shape)
-        print(batch.id)
-        print(outputs.shape)
-        # outputs = outputs[-2]
         averaged_out = self.hparams.avg_pool(outputs)
-        print(averaged_out.shape)
 
         outputs = self.modules.output_mlp(averaged_out)
-        print(outputs.shape)
         
         outputs = self.hparams.log_softmax(outputs)
 
@@ -44,23 +41,30 @@ class EmoIdBrain(sb.Brain):
 
         if stage == sb.Stage.TEST:
             preds = torch.argmax(predictions, dim=2)
-            print(emoid)
-            print(preds)
+            emoid_decoded = label_encoder.decode_ndim(emoid)
+            preds_decoded = label_encoder.decode_ndim(preds)
+            
+            self.load_ZED()
             with open(self.hparams.cer_file, "a") as w:
                 for i in range(len(batch.id)):
-                    ref_str = [str(int(x)) for x in emoid[i]]
-                    pred_str = [str(int(x)) for x in preds[i]]
+                    if len(preds_decoded[i]) < len(emoid_decoded[i]):
+                        preds_decoded[i].append(preds_decoded[i][-1])
+                    eder = EDER(
+                        prediction=preds_decoded[i],
+                        id=batch.id[i],
+                        duration=self.ZED[batch.id[i]]["duration"],
+                        emotion=self.ZED[batch.id[i]]["emotion"],
+                        window_length=self.hparams.window_length * 0.02,
+                        stride=self.hparams.stride * 0.02,
+                    )
+                    print(eder)
                     w.write("    wav_id : " + batch.id[i] + "\n")
-                    w.write(" reference : " + "".join(ref_str) + "\n")
-                    w.write("prediction : " + "".join(pred_str) + "\n")
+                    w.write(" reference : " + "".join(emoid_decoded[i]) + "\n")
+                    w.write("prediction : " + "".join(preds_decoded[i]) + "\n")
+                    w.write("      EDER : " + str(eder) + "\n")
                     w.write("\n")
 
-        # print(" reference : ", emoid)
-        # print("prediction : ", torch.argmax(predictions, dim=2))
-        # print("\n")
-        # print("\n")
-        # emoid = emoid.squeeze(1)
-        # print(emoid.shape)
+                    self.eder.append(eder)
 
         loss = self.hparams.compute_cost(predictions, emoid)
         if stage != sb.Stage.TRAIN:
@@ -98,7 +102,7 @@ class EmoIdBrain(sb.Brain):
         self.loss_metric = sb.utils.metric_stats.MetricStats(
             metric=sb.nnet.losses.nll_loss
         )
-
+        self.eder = []
         # Set up evaluation-only statistics trackers
         if stage != sb.Stage.TRAIN:
             self.error_metrics = self.hparams.error_stats()
@@ -157,11 +161,19 @@ class EmoIdBrain(sb.Brain):
         if stage == sb.Stage.TEST:
             self.hparams.train_logger.log_stats(
                 {"Epoch loaded": self.hparams.epoch_counter.current},
-                test_stats=stats,
+                test_stats={
+                    "loss": stats["loss"],
+                    "error_rate": stats["error_rate"],
+                    "EDER": sum(self.eder)/len(self.eder)},
             )
-            with open(self.hparams.cer_file, "a") as w:
-                self.error_metrics.write_stats(w)
+            # with open(self.hparams.cer_file, "a") as w:
+            #     self.error_metrics.write_stats(w)
 
+    def load_ZED(self):
+        with open(self.hparams.test_annotation, 'r') as f:
+            ZED_data = json.load(f)
+        self.ZED = ZED_data
+    
     def init_optimizers(self):
         "Initializes the wav2vec2 optimizer and model optimizer"
         self.wav2vec2_optimizer = self.hparams.wav2vec2_opt_class(

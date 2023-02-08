@@ -54,3 +54,37 @@ def dict_to_rttm(ids, onsets, durations, labels, output_rttm):
         for i in range(len(ids)) :
             f.write("SPEAKER " + id[i] + " 1 " + str(onsets[i]) + " " + str(durations[i]) + " <NA> <NA> " + "inference" + " <NA>" + "\n")
 
+
+def write_rttm(segs_list, out_rttm_file):
+    """Writes the segment list in RTTM format (A standard NIST format).
+    Arguments
+    ---------
+    segs_list : list of list
+        Each list contains [rec_id, sseg_start, sseg_end, spkr_id].
+    out_rttm_file : str
+        Path of the output RTTM file.
+    """
+
+    rttm = []
+    rec_id = segs_list[0][0]
+
+    for seg in segs_list:
+        new_row = [
+            "EMOTION",
+            rec_id,
+            "0",
+            str(round(seg[1], 4)),
+            str(round(seg[2] - seg[1], 4)),
+            "<NA>",
+            "<NA>",
+            seg[3],
+            "<NA>",
+            "<NA>",
+        ]
+        rttm.append(new_row)
+
+    with open(out_rttm_file, "w") as f:
+        for row in rttm:
+            line_str = " ".join(row)
+            f.write("%s\n" % line_str)
+            
