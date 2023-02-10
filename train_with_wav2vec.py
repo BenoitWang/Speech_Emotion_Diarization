@@ -57,7 +57,7 @@ class EmoIdBrain(sb.Brain):
                         window_length=self.hparams.window_length * 0.02,
                         stride=self.hparams.stride * 0.02,
                     )
-                    print(eder)
+                    # print(eder)
                     w.write("    wav_id : " + batch.id[i] + "\n")
                     w.write(" reference : " + "".join(emoid_decoded[i]) + "\n")
                     w.write("prediction : " + "".join(preds_decoded[i]) + "\n")

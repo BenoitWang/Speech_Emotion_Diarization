@@ -246,17 +246,17 @@ def reference_to_lol(id, duration, emotion):
     return lol
 
 
-if __name__ == "__main__":
-    reference = {
-        "wav": "/rd_storage/yingzhi_koios/emotion_datasets/ESD/combined/0012/0012_000245_001106_000293.wav",
-        "duration": 1.42,
-        "emotion": [
-            {
-                "emo": "sad",
-                "start": 0.38,
-                "end": 1.42
-            }
-        ]
-    }
-    prediction = ["n", "n", "s", "s", "s", "s", "s", "s"]
-    EDER(prediction, "ghj", reference["duration"], reference["emotion"], 0.2, 0.2)
+# if __name__ == "__main__":
+#     reference = {
+#         "wav": "/rd_storage/yingzhi_koios/emotion_datasets/ESD/combined/0012/0012_000245_001106_000293.wav",
+#         "duration": 1.42,
+#         "emotion": [
+#             {
+#                 "emo": "sad",
+#                 "start": 0.38,
+#                 "end": 1.42
+#             }
+#         ]
+#     }
+#     prediction = ["n", "n", "s", "s", "s", "s", "s", "s"]
+#     EDER(prediction, "ghj", reference["duration"], reference["emotion"], 0.2, 0.2)
