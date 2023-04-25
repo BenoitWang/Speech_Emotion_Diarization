@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-<img src="images/ser_sed.png" alt="ser_sed" style="width: 40%; min-width: 300px; display: block; margin: auto;">
+<img src="images/ser_sed.png" alt="ser_sed" style="width: 80%; min-width: 300px; display: block; margin: auto;">
 </p>
 
 
