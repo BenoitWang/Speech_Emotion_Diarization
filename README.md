@@ -1,16 +1,18 @@
-![ser_sed](images/ser_sed.png)
-
-
-
+<p align="center" width="100%">
+<img src="images/ser_sed.png" alt="ser_sed" style="width: 40%; min-width: 300px; display: block; margin: auto;">
+</p>
 
 
 # Speech Emotion Diarization (SED)
+
+[![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/LICENSE)
+[![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/DATA_LICENSE)
 
 Speech Emotion Diarization ([arXiv link](to be added)) aims to predict the correct emotions and their temporal boundaries with in an utterance. 
 
 
 
-Another implementation will soon be made available on [SpeechBrain](https://github.com/speechbrain/speechbrain).
+Since the implementation is based on the popular [SpeechBrain](https://github.com/speechbrain/speechbrain) toolkit, another implementation will soon be made available on SpeechBrain.
 
 
 
