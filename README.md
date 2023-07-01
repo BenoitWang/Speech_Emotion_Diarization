@@ -8,18 +8,14 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/LICENSE)
 [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/DATA_LICENSE)
 
-Speech Emotion Diarization ([arXiv link](to be added)) aims to predict the correct emotions and their temporal boundaries with in an utterance. 
-
-
-
-Since the implementation is based on the popular [SpeechBrain](https://github.com/speechbrain/speechbrain) toolkit, another implementation will soon be made available on SpeechBrain.
-
+Speech Emotion Diarization ([arXiv link](https://arxiv.org/pdf/2306.12991.pdf)) aims to predict the correct emotions and their temporal boundaries within an utterance. 
 
 
 ## Dependencies
 
 The implementation is based on the popular speech tookit [SpeechBrain](https://github.com/speechbrain/speechbrain). 
 
+Another implementation will be made available soon on SpeechBrain.
 
 
 To install the dependencies, do  `pip install -r requirements.txt`
@@ -29,7 +25,7 @@ To install the dependencies, do  `pip install -r requirements.txt`
 ## Datasets
 
 ### Test Set
-The test is based on Zaion Emotion Database (ZED), which can be downloaded [here](to be added).
+The test is based on Zaion Emotion Dataset (ZED), which can be downloaded [here](https://zaion.ai/en/resources/zaion-lab-blog/zaion-emotion-dataset/).
 
 ### Training Set Preparation
 1. RAVDESS: https://zenodo.org/record/1188976/files/Audio_Speech_Actors_01-24.zip?download=1
@@ -69,19 +65,19 @@ The four components are:
 
 ## Run the code
 
-Model configs and experiment settings can be modified in `hparams/train_with_wav2vec.yaml`.
+Model configs and experiment settings can be modified in `hparams/train.yaml`.
 
 
 
-To run the code, do `python train_with_wav2vec.py hparams/train_with_wav2vec.yaml`.
+To run the code, do `python train.py hparams/train.yaml --zed_folder /path/to/ZED --emovdb_folder /path/to/EmoV-DB --esd_folder /path/to/ESD --iemocap_folder /path/to/IEMOCAP --jlcorpus_folder /path/to/JL_corpus --ravdess_folder /path/to/RAVDESS`.
 
 
 
-The data preparation may take several hours.
+The data preparation may take a while.
 
 
 
-A `results` repository will be generated that contains checkpoints,  logs, etc. The frame-wise classification result for each utterance can be found in `cer.txt`.
+A `results` repository will be generated that contains checkpoints, logs, etc. The frame-wise classification result for each utterance can be found in `eder.txt`.
 
 
 
@@ -91,18 +87,13 @@ The pretrained models and a easy-inference interface can be found on [HuggingFac
 
 
 
-## Citation
+## **About Speech Emotion Diarization/Zaion Emotion Dataset**
 
-Please, cite our paper if you use it for your research or business.
-to be changed
 ```bibtex
-@misc{speechbrain,
-  title={{SpeechBrain}: A General-Purpose Speech Toolkit},
-  author={Mirco Ravanelli and Titouan Parcollet and Peter Plantinga and Aku Rouhe and Samuele Cornell and Loren Lugosch and Cem Subakan and Nauman Dawalatabad and Abdelwahab Heba and Jianyuan Zhong and Ju-Chieh Chou and Sung-Lin Yeh and Szu-Wei Fu and Chien-Feng Liao and Elena Rastorgueva and François Grondin and William Aris and Hwidong Na and Yan Gao and Renato De Mori and Yoshua Bengio},
-  year={2021},
-  eprint={2106.04624},
-  archivePrefix={arXiv},
-  primaryClass={eess.AS},
-  note={arXiv:2106.04624}
+@article{wang2023speech,
+  title={Speech Emotion Diarization: Which Emotion Appears When?},
+  author={Wang, Yingzhi and Ravanelli, Mirco and Nfissi, Alaa and Yacoubi, Alya},
+  journal={arXiv preprint arXiv:2306.12991},
+  year={2023}
 }
 ```

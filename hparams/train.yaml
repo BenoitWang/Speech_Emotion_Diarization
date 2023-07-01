@@ -1,29 +1,27 @@
 # #######################################
-# Model: wav2vec2 for Emotion Diarization
-# Authors: 
+# Model: wavlm for Emotion Diarization
+# Authors:
 #  * Yingzhi Wang 2023
 # ################################
 
 # Seed needs to be set at top of yaml, before objects with parameters are made
-seed: 12
+seed: 78
 __set_seed: !apply:torch.manual_seed [!ref <seed>]
-output_folder: !ref results/wav2vec_base_0.2_0.2/<seed>
-cer_file: !ref <output_folder>/cer.txt
+output_folder: !ref results/zed_wavlm_large/<seed>
+eder_file: !ref <output_folder>/eder.txt
 save_folder: !ref <output_folder>/save
 train_log: !ref <output_folder>/train_log.txt
 
-# wav2vec2_hub: "LeBenchmark/wav2vec2-FR-3K-base"
-wav2vec2_hub: "facebook/wav2vec2-base"
-# wav2vec2_hub: "facebook/hubert-base-ls960"
+wav2vec2_hub: "microsoft/wavlm-large" # "facebook/wav2vec2-large" "facebook/hubert-large-ll60k"
 
 # Data files
-zed_folder: /projects/ywang/research_emo_db/ZED_final_1
+zed_folder: !PLACEHOLDER # e,g./path/to/ZED
 
-emovdb_folder: /rd_storage/yingzhi_koios/emotion_datasets/EmoV-DB/
-esd_folder: /rd_storage/yingzhi_koios/emotion_datasets/ESD/
-iemocap_folder: /rd_storage/yingzhi_koios/emotion_datasets/IEMOCAP_full_release/
-jlcorpus_folder: /rd_storage/yingzhi_koios/emotion_datasets/JL_corpus/
-ravdess_folder: /rd_storage/yingzhi_koios/emotion_datasets/RAVDESS/
+emovdb_folder: !PLACEHOLDER # e,g./path/to/EmoV-DB
+esd_folder: !PLACEHOLDER # e,g./path/to/ESD
+iemocap_folder: !PLACEHOLDER # e,g./path/to/IEMOCAP_full_release
+jlcorpus_folder: !PLACEHOLDER # e,g./path/to/JL_corpus
+ravdess_folder: !PLACEHOLDER # e,g./path/to/RAVDESS
 
 split_ratio: [90, 10]
 
@@ -31,9 +29,8 @@ train_annotation: !ref <output_folder>/train.json
 valid_annotation: !ref <output_folder>/valid.json
 test_annotation: !ref <output_folder>/test.json
 
-ckpt_interval_minutes: 15 # save checkpoint every N min
 # Training parameters
-number_of_epochs: 30
+number_of_epochs: 15
 lr: 0.0001
 lr_wav2vec: 0.00001
 sorting: ascending
@@ -44,8 +41,22 @@ sample_rate: 16000
 # With data_parallel batch_size is split into N jobs
 # With DDP batch_size is multiplied by N jobs
 # Must be 3 per GPU to fit 32GB of VRAM
-batch_size: 4
+batch_size: 2
 test_batch_size: 1
+
+#freeze all wav2vec2
+freeze_wav2vec2: False
+freeze_wav2vec2_conv: True
+
+window_length: 1 # win_len = 0.02 * 1 = 0.02s
+stride: 1 # stride = 0.02 * 1 = 0.02s
+
+encoder_dim: 1024
+# Outputs
+out_n_neurons: 4  # BPE size, index(blank/eos/bos) = 0
+
+use_threshold: False
+threshold: -0.05
 
 # Dataloader options
 dataloader_options:
@@ -55,22 +66,11 @@ dataloader_options:
     drop_last: False
 
 test_dataloader_opts:
-   batch_size: !ref <test_batch_size>
+    batch_size: !ref <test_batch_size>
 
 # Model parameters
 activation: !name:torch.nn.LeakyReLU
 # dnn_layers: 2
-
-#freeze all wav2vec2
-freeze_wav2vec2: False
-freeze_wav2vec2_conv: True
-
-window_length: 10 # win_len = 0.02 * 10 = 0.2s
-stride: 10 # stride = 0.02 * 10 = 0.2s
-
-encoder_dim: 768
-# Outputs
-out_n_neurons: 5  # BPE size, index(blank/eos/bos) = 0
 
 # # DER evaluation parameters
 # ignore_overlap: True
@@ -82,6 +82,10 @@ epoch_counter: !new:speechbrain.utils.epoch_loop.EpochCounter
 augmentation: !new:speechbrain.lobes.augment.TimeDomainSpecAugment
     sample_rate: !ref <sample_rate>
     speeds: [95, 100, 105]
+
+input_norm: !new:speechbrain.processing.features.InputNormalization
+    norm_type: sentence
+    std_norm: False
 
 wav2vec2: !new:speechbrain.lobes.models.huggingface_wav2vec.HuggingFaceWav2Vec2
     source: !ref <wav2vec2_hub>
@@ -108,6 +112,7 @@ log_softmax: !new:speechbrain.nnet.activations.Softmax
 compute_cost: !name:speechbrain.nnet.losses.nll_loss
 
 modules:
+    input_norm: !ref <input_norm>
     wav2vec2: !ref <wav2vec2>
     output_mlp: !ref <output_mlp>
 
@@ -141,6 +146,7 @@ lr_annealing_wav2vec2: !new:speechbrain.nnet.schedulers.NewBobScheduler
 checkpointer: !new:speechbrain.utils.checkpoints.Checkpointer
     checkpoints_dir: !ref <save_folder>
     recoverables:
+        input_norm: !ref <input_norm>
         wav2vec2: !ref <wav2vec2>
         model: !ref <model>
         scheduler_model: !ref <lr_annealing>

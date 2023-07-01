@@ -8,20 +8,19 @@ import os
 import sys
 import speechbrain as sb
 from hyperpyyaml import load_hyperpyyaml
-from utils.EDER import EDER
 import torch
 import json
+import itertools
+from utils.EDER import EDER
 
 
-class EmoIdBrain(sb.Brain):
+class EmoDiaBrain(sb.Brain):
     def compute_forward(self, batch, stage):
         """Computation pipeline based on a encoder + emotion classifier.
         """
-        # print(batch.id)
         batch = batch.to(self.device)
-        # batch = batch.to("cpu")
-        self.modules = self.modules.to("cuda")
-        self.hparams.input_norm = self.hparams.input_norm.to("cuda")
+
+        self.modules = self.modules.to(self.device)
 
         wavs, lens = batch.sig
         wavs = self.hparams.input_norm(wavs, lens)
@@ -29,7 +28,7 @@ class EmoIdBrain(sb.Brain):
         averaged_out = self.hparams.avg_pool(outputs)
 
         outputs = self.modules.output_mlp(averaged_out)
-        
+
         outputs = self.hparams.log_softmax(outputs)
 
         return outputs
@@ -40,12 +39,16 @@ class EmoIdBrain(sb.Brain):
         emoid, _ = batch.emo_encoded
 
         if stage == sb.Stage.TEST:
-            preds = torch.argmax(predictions, dim=2)
+            if self.hparams.use_threshold:
+                preds = threshold_tuning(predictions, self.hparams.threshold)
+            else:
+                preds = torch.argmax(predictions, dim=2)
+
             emoid_decoded = label_encoder.decode_ndim(emoid)
             preds_decoded = label_encoder.decode_ndim(preds)
-            
+
             self.load_ZED()
-            with open(self.hparams.cer_file, "a") as w:
+            with open(self.hparams.eder_file, "a") as w:
                 for i in range(len(batch.id)):
                     if len(preds_decoded[i]) < len(emoid_decoded[i]):
                         preds_decoded[i].append(preds_decoded[i][-1])
@@ -57,10 +60,20 @@ class EmoIdBrain(sb.Brain):
                         window_length=self.hparams.window_length * 0.02,
                         stride=self.hparams.stride * 0.02,
                     )
-                    # print(eder)
+
                     w.write("    wav_id : " + batch.id[i] + "\n")
                     w.write(" reference : " + "".join(emoid_decoded[i]) + "\n")
                     w.write("prediction : " + "".join(preds_decoded[i]) + "\n")
+                    w.write(
+                        " ctc_label : "
+                        + "".join(del_adjacent(emoid_decoded[i]))
+                        + "\n"
+                    )
+                    w.write(
+                        "  ctc_pred : "
+                        + "".join(del_adjacent(preds_decoded[i]))
+                        + "\n"
+                    )
                     w.write("      EDER : " + str(eder) + "\n")
                     w.write("\n")
 
@@ -74,7 +87,6 @@ class EmoIdBrain(sb.Brain):
 
     def fit_batch(self, batch):
         """Trains the parameters given a single batch in input"""
-
         predictions = self.compute_forward(batch, sb.Stage.TRAIN)
         loss = self.compute_objectives(predictions, batch, sb.Stage.TRAIN)
         loss.backward()
@@ -164,16 +176,17 @@ class EmoIdBrain(sb.Brain):
                 test_stats={
                     "loss": stats["loss"],
                     "error_rate": stats["error_rate"],
-                    "EDER": sum(self.eder)/len(self.eder)},
+                    "EDER": sum(self.eder) / len(self.eder),
+                },
             )
             # with open(self.hparams.cer_file, "a") as w:
             #     self.error_metrics.write_stats(w)
 
     def load_ZED(self):
-        with open(self.hparams.test_annotation, 'r') as f:
+        with open(self.hparams.test_annotation, "r") as f:
             ZED_data = json.load(f)
         self.ZED = ZED_data
-    
+
     def init_optimizers(self):
         "Initializes the wav2vec2 optimizer and model optimizer"
         self.wav2vec2_optimizer = self.hparams.wav2vec2_opt_class(
@@ -226,12 +239,9 @@ def dataio_prep(hparams):
     for dataset in ["train", "valid", "test"]:
         datasets[dataset] = sb.dataio.dataset.DynamicItemDataset.from_json(
             json_path=hparams[f"{dataset}_annotation"],
-            # replacements={"data_root": hparams["data_folder"]},
             dynamic_items=[audio_pipeline, label_pipeline],
             output_keys=["id", "sig", "emo_encoded"],
         )
-
-    # sb.dataio.dataset.add_dynamic_item(datasets, label_pipeline)
 
     lab_enc_file = os.path.join(hparams["save_folder"], "label_encoder.txt")
 
@@ -239,11 +249,28 @@ def dataio_prep(hparams):
         path=lab_enc_file,
         from_didatasets=[datasets["train"]],
         output_key="frame_label",
-        # special_labels=special_labels,
         sequence_input=True,
     )
 
-    return datasets, label_encoder 
+    return datasets, label_encoder
+
+
+def threshold_tuning(batch_predictions, threshold):
+    """Post processing by finding a threshold
+
+    Args:
+        predictions torch.Tensor: (b, t, 4)
+    """
+    argmax_preds = torch.argmax(batch_predictions, dim=2)
+    max, _ = torch.max(batch_predictions, dim=2)
+    index = torch.gt(max, threshold)
+    return torch.mul(index, argmax_preds)
+
+
+def del_adjacent(list):
+    """delete adjacent elements that is the same as the f
+    """
+    return [k for k, g in itertools.groupby(list)]
 
 
 # RECIPE BEGINS!
@@ -266,7 +293,7 @@ if __name__ == "__main__":
         overrides=overrides,
     )
 
-    from prepare import prepare_train, prepare_test
+    from zed_prepare import prepare_train, prepare_test
 
     # Data preparation, to be run on only one process.
     sb.utils.distributed.run_on_main(
@@ -298,14 +325,13 @@ if __name__ == "__main__":
     datasets, label_encoder = dataio_prep(hparams)
 
     hparams["wav2vec2"] = hparams["wav2vec2"].to(run_opts["device"])
-    hparams["wav2vec2"] = hparams["wav2vec2"].to("cuda")
-    
+
     # freeze the feature extractor part when unfreezing
     if not hparams["freeze_wav2vec2"] and hparams["freeze_wav2vec2_conv"]:
         hparams["wav2vec2"].model.feature_extractor._freeze_parameters()
 
     # Initialize the Brain object to prepare for mask training.
-    emo_id_brain = EmoIdBrain(
+    emo_id_brain = EmoDiaBrain(
         modules=hparams["modules"],
         opt_class=hparams["opt_class"],
         hparams=hparams,
