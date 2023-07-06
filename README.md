@@ -8,7 +8,16 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/LICENSE)
 [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/DATA_LICENSE)
 
-Speech Emotion Diarization ([arXiv link](https://arxiv.org/pdf/2306.12991.pdf)) aims to predict the correct emotions and their temporal boundaries within an utterance. 
+[Speech Emotion Diarization](https://arxiv.org/pdf/2306.12991.pdf) is a technique that focuses on predicting emotions and their corresponding time boundaries within a speech recording. The model, described in the research paper titled "Speech Emotion Diarization" ([available here](https://arxiv.org/pdf/2306.12991.pdf)), has been trained using audio samples that include neutral and a non-neutral emotional event. The model's output takes the form of a dictionary comprising emotion components (*neutral*, *happy*, *angry*, and *sad*) along with their respective start and end boundaries, as exemplified below:
+
+```python
+{
+   'example.wav': [
+      {'start': 0.0, 'end': 1.94, 'emotion': 'n'},  # 'n' denotes neutral
+      {'start': 1.94, 'end': 4.48, 'emotion': 'h'}   # 'h' denotes happy
+   ]
+}
+```
 
 
 ## Dependencies
@@ -81,9 +90,23 @@ A `results` repository will be generated that contains checkpoints, logs, etc. T
 
 
 
+## Results
+
+The EDER (Emotion Diarization Error Rate) reported here was averaged on 5 different seeds, results of other models (wav2vec2.0, HuBERT) can be found in the paper. You can find our training results (model, logs, etc) [here](https://www.dropbox.com/sh/woudm1v31a7vyp5/AADAMxpQOXaxf8E_1hX202GJa?dl=0).
+
+
+| model | EDER |
+|:-------------:|:---------------------------:|
+| WavLM-large | 30.2 ± 1.60 |
+
+
+It takes about 40 mins/epoch with 1xRTX8000(40G), reduce the batch size if OOM.
+
+
+
 ## Inference
 
-The pretrained models and a easy-inference interface can be found on [HuggingFace](to be added).
+The pretrained models and a easy-inference interface can be found on [HuggingFace](https://huggingface.co/speechbrain/emotion-diarization-wavlm-large).
 
 
 
