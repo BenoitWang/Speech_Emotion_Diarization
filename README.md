@@ -8,7 +8,18 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/LICENSE)
 [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://https://github.com/BenoitWang/Speech_Emotion_Diarization/blob/main/DATA_LICENSE)
 
-[Speech Emotion Diarization](https://arxiv.org/pdf/2306.12991.pdf) is a technique that focuses on predicting emotions and their corresponding time boundaries within a speech recording. The model, described in the research paper titled "Speech Emotion Diarization" ([available here](https://arxiv.org/pdf/2306.12991.pdf)), has been trained using audio samples that include neutral and a non-neutral emotional event. The model's output takes the form of a dictionary comprising emotion components (*neutral*, *happy*, *angry*, and *sad*) along with their respective start and end boundaries, as exemplified below:
+[Speech Emotion Diarization](https://arxiv.org/pdf/2306.12991.pdf) is a technique that focuses on predicting emotions and their corresponding time boundaries within a speech recording. 
+
+The model has been trained using audio samples that include one non-neutral emotional event, which belong to one of the four following transitional sequences:
+```
+neutral-emotional
+neutral-emotional-neutral
+emotional-neutral
+emotional
+```
+
+
+The model's output takes the form of a dictionary comprising emotion components (*neutral*, *happy*, *angry*, and *sad*) along with their respective start and end boundaries, as exemplified below:
 
 ```python
 {
@@ -22,10 +33,9 @@
 
 ## Dependencies
 
-The implementation is based on the popular speech tookit [SpeechBrain](https://github.com/speechbrain/speechbrain). 
+The implementation is based on the popular speech tookit [SpeechBrain](https://github.com/speechbrain/speechbrain).
 
-Another implementation will be made available soon on SpeechBrain.
-
+Another implementation of this project can be found [here](https://github.com/speechbrain/speechbrain/tree/develop/recipes/ZaionEmotionDataset) as a SpeechBrain recipe.
 
 To install the dependencies, do  `pip install -r requirements.txt`
 
@@ -70,12 +80,11 @@ The four components are:
 3. Emotion Confusion (CF): Length of emotional segments that are assigned to another(other) incorrect emotion(s).
 4. Emotion Overlap (OL): Length of non-overlapped emotional segments that are predicted to contain other overlapped emotions apart from the correct one
 
-
+Even though frame-wise classification accuracy can also reflect the system's capacity, it is not always convincing because it depends on the frame length (resolution). A higher accuracy of frame-wise classification does not equal that the model can better diarize. Hence, EDER is a more common metric for the task.
 
 ## Run the code
 
 Model configs and experiment settings can be modified in `hparams/train.yaml`.
-
 
 
 To run the code, do `python train.py hparams/train.yaml --zed_folder /path/to/ZED --emovdb_folder /path/to/EmoV-DB --esd_folder /path/to/ESD --iemocap_folder /path/to/IEMOCAP --jlcorpus_folder /path/to/JL_corpus --ravdess_folder /path/to/RAVDESS`.
