@@ -44,7 +44,7 @@ To install the dependencies, do  `pip install -r requirements.txt`
 ## Datasets
 
 ### Test Set
-The test is based on Zaion Emotion Dataset (ZED), which can be downloaded [here](https://zaion.ai/en/resources/zaion-lab-blog/zaion-emotion-dataset/).
+The test is based on **Zaion Emotion Dataset (ZED)**, which can be downloaded via this [link](https://www.dropbox.com/scl/fi/2s3ro8tmgt1lir77z3hj5/ZED.zip?rlkey=qkizx7t3ozo02xs7k1tlexb1e&st=9l466c1c&dl=0).
 
 ### Training Set Preparation
 1. RAVDESS: https://zenodo.org/record/1188976/files/Audio_Speech_Actors_01-24.zip?download=1
