@@ -51,7 +51,7 @@ The test is based on **Zaion Emotion Dataset (ZED)**, which can be downloaded vi
 
    Unzip and rename the folder as "RAVDESS".
 
-2. ESD: https://github.com/HLTSingapore/Emotional-Speech-Data
+2. ESD: Download the ESD dataset via this [link](https://drive.google.com/file/d/1_0qvBnrrDPWqFiGi4JThm0X5fYTu-Fm4/view?usp=sharing). It should be noted that the `prepare_ESD.py` script works only with this old version of the dataset.
 
    Unzip and rename the folder as "ESD".
 
