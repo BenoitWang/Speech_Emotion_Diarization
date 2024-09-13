@@ -122,10 +122,12 @@ The pretrained models and a easy-inference interface can be found on [HuggingFac
 ## **About Speech Emotion Diarization/Zaion Emotion Dataset**
 
 ```bibtex
-@article{wang2023speech,
-  title={Speech Emotion Diarization: Which Emotion Appears When?},
-  author={Wang, Yingzhi and Ravanelli, Mirco and Nfissi, Alaa and Yacoubi, Alya},
-  journal={arXiv preprint arXiv:2306.12991},
-  year={2023}
+@inproceedings{wang2023speech,
+  title={Speech emotion diarization: Which emotion appears when?},
+  author={Wang, Yingzhi and Ravanelli, Mirco and Yacoubi, Alya},
+  booktitle={2023 IEEE Automatic Speech Recognition and Understanding Workshop (ASRU)},
+  pages={1--7},
+  year={2023},
+  organization={IEEE}
 }
 ```
